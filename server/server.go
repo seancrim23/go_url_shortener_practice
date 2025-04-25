@@ -8,15 +8,19 @@ import (
 type UrlShortenerServer struct {
 	service      services.UrlShortenerService
 	cacheService services.UrlShortenerCacheService
-	http.Handler
+	router       http.Handler
+	config       Config
 }
 
-func NewUrlShortenerServer(service services.UrlShortenerService, cacheService services.UrlShortenerCacheService) (*UrlShortenerServer, error) {
+// refactor this to have the config load everything
+func NewUrlShortenerServer(config Config) (*UrlShortenerServer, error) {
 	h := new(UrlShortenerServer)
+	h := &UrlShortenerServer{}
 
 	h.service = service
 	h.cacheService = cacheService
 
+	h.loadRoutes()
 	//add routing figure out what the new good router is
 
 	return h, nil
