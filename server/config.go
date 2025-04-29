@@ -8,6 +8,7 @@ type Config struct {
 	RedisUsername string
 	RedisPass     string
 	ServerPort    uint16
+	GCPProjectId  string
 }
 
 // build out the setters along with what i add to the struct
@@ -17,6 +18,7 @@ func LoadConfig() Config {
 		RedisAddress:  "tbd",
 		RedisUsername: "default",
 		ServerPort:    3000,
+		GCPProjectId:  "changeme",
 	}
 
 	if redisPass, exists := os.LookupEnv("REDIS_PASS"); exists {
