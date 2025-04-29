@@ -1,6 +1,7 @@
 package server
 
 import (
+	"go_url_shortener/handler"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -23,7 +24,12 @@ func (u *UrlShortenerServer) loadRoutes() {
 }
 
 func (u *UrlShortenerServer) loadUrlRoutes(router chi.Router) {
-	//build out url related routes
+	urlHandler := &handler.Url{
+		service: u.service,
+	}
+
+	router.Post("/", urlHandler.CreateShortUrl)
+	router.Get("/{id}", urlHandler.GetLongUrl)
 }
 
 func (u *UrlShortenerServer) loadUserRoutes(router chi.Router) {

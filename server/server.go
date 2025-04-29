@@ -13,6 +13,7 @@ import (
 type UrlShortenerServer struct {
 	service      services.UrlShortenerService
 	cacheService services.UrlShortenerCacheService
+	userService  services.UserService
 	router       http.Handler
 	config       Config
 }
@@ -22,6 +23,7 @@ func NewUrlShortenerServer(config Config) *UrlShortenerServer {
 	h := &UrlShortenerServer{
 		service:      services.NewFirestoreUrlShortenerService(config),
 		cacheService: services.NewRedisUrlShortenerCacheService(config),
+		userService:  services.NewFirestoreUserService(config),
 		config:       config,
 	}
 
@@ -59,6 +61,7 @@ func (u *UrlShortenerServer) StartUrlShortenerServer(ctx context.Context) error 
 	}
 	//doing this here feels weird?
 	u.service.database = database
+	u.userService.database = database
 
 	defer func() {
 		if err := u.service.database.Close(); err != nil {
