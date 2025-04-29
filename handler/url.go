@@ -37,7 +37,7 @@ func (u *Url) CreateShortUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shortUrl, err := u.service.CreateShortUrl(longUrl)
+	shortUrl, err := u.service.CreateShortUrl(r.Context(), longUrl)
 	//determine what type of error and change code and return according error message
 	if err != nil {
 		code = 500
@@ -58,6 +58,8 @@ func (u *Url) GetLongUrl(w http.ResponseWriter, r *http.Request) {
 		utils.RespondWithError(w, code, errors.New("no shortUrl passed to request").Error())
 		return
 	}
+
+	//TODO get a check somewhere in here eventually to see if the url is in the cache
 
 	longUrl, err := u.service.GetLongUrl(shortUrl)
 	//determine what type of error and change code and return according error message

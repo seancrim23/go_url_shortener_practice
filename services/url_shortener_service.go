@@ -1,6 +1,8 @@
 package services
 
+import "context"
+
 type UrlShortenerService interface {
-	CreateShortUrl(string) (string, error)
-	GetLongUrl(string) error
+	CreateShortUrl(context.Context, string) (string, error)
+	GetLongUrl(context.Context, string) (string, error)
 }
