@@ -61,7 +61,7 @@ func (u *Url) GetLongUrl(w http.ResponseWriter, r *http.Request) {
 
 	//TODO get a check somewhere in here eventually to see if the url is in the cache
 
-	longUrl, err := u.service.GetLongUrl(shortUrl)
+	longUrl, err := u.service.GetLongUrl(r.Context(), shortUrl)
 	//determine what type of error and change code and return according error message
 	if err != nil {
 		code = 500
