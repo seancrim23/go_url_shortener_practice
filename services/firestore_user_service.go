@@ -19,5 +19,5 @@ func NewFirestoreUserService(projectId string) *FirestoreUserService {
 	}
 	//setup any firebase config
 	//database connection will be made on app start
-	return &FirestoreUrlShortenerService{firebaseConfig: &firebase.Config{ProjectID: projectId}, database: nil}
+	return &FirestoreUserService{firebaseConfig: &firebase.Config{ProjectID: projectId}, database: nil}
 }

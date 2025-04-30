@@ -49,14 +49,14 @@ func (f *FirestoreUrlShortenerService) CreateShortUrl(ctx context.Context, fullU
 	//I think having the doc id be the shortened url is fine
 	//one to one lookup
 	//just have to make sure the db doesnt auto update when id exists
-	_, err := f.database.Collection("URL").Doc(shortUrl).Set(ctx, builtUrl)
+	_, err = f.database.Collection("URL").Doc(shortUrl).Set(ctx, builtUrl)
 	if err != nil {
 		fmt.Println("error generating short url")
 		fmt.Println(err)
-		return nil, errors.New("error generating short url")
+		return "", errors.New("error generating short url")
 	}
 
-	return shortUrl
+	return shortUrl, nil
 }
 
 func generateShortUrl(longUrl string) (string, error) {
@@ -69,14 +69,14 @@ func (f *FirestoreUrlShortenerService) GetLongUrl(ctx context.Context, shortUrl 
 	if err != nil {
 		fmt.Println("error getting long url")
 		fmt.Println(err)
-		return nil, errors.New("error getting long url")
+		return "", errors.New("error getting long url")
 	}
 
 	var u models.URL
 	err = dsnap.DataTo(&u)
 	if err != nil {
 		fmt.Println(err)
-		return nil, errors.New("error getting long url")
+		return "", errors.New("error getting long url")
 	}
 
 	return u.Original, nil
