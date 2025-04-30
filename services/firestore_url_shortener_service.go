@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"go_url_shortener/models"
+	"math/rand"
 	"os"
 	"time"
 
@@ -27,15 +28,13 @@ func NewFirestoreUrlShortenerService(projectId string) *FirestoreUrlShortenerSer
 	return &FirestoreUrlShortenerService{firebaseConfig: &firebase.Config{ProjectID: projectId}, database: nil}
 }
 
-func (f *FirestoreUrlShortenerService) CreateShortUrl(ctx context.Context, fullUrl string) (string, error) {
-	//this function should take in a long url
-	//a new id should be generated
-	shortUrl, err := generateShortUrl(fullUrl)
-	if err != nil {
-		return "", err
-	}
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
+func (f *FirestoreUrlShortenerService) CreateShortUrl(ctx context.Context, fullUrl string) (string, error) {
+	//TODO figure out if theres any reason to change the short url length
+	shortUrl := generateShortUrl(8)
 	currentTime := time.Now()
+
 	builtUrl := &models.URL{
 		Shortened: shortUrl,
 		Original:  fullUrl,
@@ -49,7 +48,7 @@ func (f *FirestoreUrlShortenerService) CreateShortUrl(ctx context.Context, fullU
 	//I think having the doc id be the shortened url is fine
 	//one to one lookup
 	//just have to make sure the db doesnt auto update when id exists
-	_, err = f.database.Collection("URL").Doc(shortUrl).Set(ctx, builtUrl)
+	_, err := f.database.Collection("URL").Doc(shortUrl).Set(ctx, builtUrl)
 	if err != nil {
 		fmt.Println("error generating short url")
 		fmt.Println(err)
@@ -59,9 +58,19 @@ func (f *FirestoreUrlShortenerService) CreateShortUrl(ctx context.Context, fullU
 	return shortUrl, nil
 }
 
-func generateShortUrl(longUrl string) (string, error) {
-	//actually do some sort of business logic here
-	return "abc123" + longUrl, nil
+// basically from the internet
+// TODO update if theres any custom url or more fancy url generation i find
+func generateShortUrl(length int) string {
+	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	var result []byte
+
+	for i := 0; i < length; i++ {
+		index := seededRand.Intn(len(charset))
+		result = append(result, charset[index])
+	}
+
+	return string(result)
 }
 
 func (f *FirestoreUrlShortenerService) GetLongUrl(ctx context.Context, shortUrl string) (string, error) {
