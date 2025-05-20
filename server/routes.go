@@ -20,14 +20,15 @@ func (u *UrlShortenerServer) loadRoutes() {
 	router.Route("/url", u.loadUrlRoutes)
 	router.Route("/user", u.loadUserRoutes)
 
-	u.router = router
+	u.Router = router
 }
 
 func (u *UrlShortenerServer) loadUrlRoutes(router chi.Router) {
 	urlHandler := &handler.Url{
-		service: u.service,
+		Service: u.Service,
 	}
 
+	router.Get("/", urlHandler.GetURLForm)
 	router.Post("/", urlHandler.CreateShortUrl)
 	router.Get("/{id}", urlHandler.GetLongUrl)
 }

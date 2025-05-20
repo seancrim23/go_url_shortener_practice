@@ -1,0 +1,12 @@
+{{if .Shortened}}
+    <h1>Your new URL is {{.NewURL}}</h1>
+{{else if .Error}}
+    <h1>Error generating shortened URL: {{.Error}}</h1>
+{{else}}
+    <h1>URL Shortener</h1>
+    <form method="POST">
+        <label>Enter a URL to shorten:</label><br/>
+        <input type="text" name="url"><br />
+        <input type="submit">
+    </form>
+{{end}}

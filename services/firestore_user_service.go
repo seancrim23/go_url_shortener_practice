@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -9,15 +10,30 @@ import (
 )
 
 type FirestoreUserService struct {
-	firebaseConfig *firebase.Config
-	database       *firestore.Client
+	database *firestore.Client
 }
 
-func NewFirestoreUserService(projectId string) *FirestoreUserService {
+func NewFirestoreUserService(ctx context.Context, projectId string) (*FirestoreUserService, func(), error) {
 	if value := os.Getenv("replace with firestore emulator host"); value != "" {
 		fmt.Println("using firestore emulator: ", value)
 	}
-	//setup any firebase config
-	//database connection will be made on app start
-	return &FirestoreUserService{firebaseConfig: &firebase.Config{ProjectID: projectId}, database: nil}
+
+	conf := &firebase.Config{ProjectID: projectId}
+	app, err := firebase.NewApp(ctx, conf)
+	if err != nil {
+		fmt.Println("error making new firebase app: ", err)
+		return nil, nil, err
+	}
+
+	database, err := app.Firestore(ctx)
+	if err != nil {
+		fmt.Println("error making firestore connection: ", err)
+		return nil, nil, err
+	}
+
+	closeFunc := func() {
+		database.Close()
+	}
+
+	return &FirestoreUserService{database: database}, closeFunc, nil
 }

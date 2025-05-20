@@ -1,15 +1,19 @@
 package services
 
-import "github.com/redis/go-redis/v9"
+import (
+	"context"
+
+	"github.com/redis/go-redis/v9"
+)
 
 //implement interface functions
 
 type RedisUrlShortenerCacheService struct {
-	Client *redis.Client
+	client *redis.Client
 }
 
-func NewRedisUrlShortenerCacheService(redisAddress string, redisUsername string, redisPassword string) *RedisUrlShortenerCacheService {
-	return &RedisUrlShortenerCacheService{Client: redis.NewClient(&redis.Options{
+func NewRedisUrlShortenerCacheService(ctx context.Context, redisAddress string, redisUsername string, redisPassword string) *RedisUrlShortenerCacheService {
+	return &RedisUrlShortenerCacheService{client: redis.NewClient(&redis.Options{
 		Addr:     redisAddress,
 		Username: redisUsername,
 		Password: redisPassword,

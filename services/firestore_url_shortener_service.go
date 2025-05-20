@@ -15,17 +15,32 @@ import (
 
 // need to implement service interface
 type FirestoreUrlShortenerService struct {
-	firebaseConfig *firebase.Config
-	database       *firestore.Client
+	database *firestore.Client
 }
 
-func NewFirestoreUrlShortenerService(projectId string) *FirestoreUrlShortenerService {
+func NewFirestoreUrlShortenerService(ctx context.Context, projectId string) (*FirestoreUrlShortenerService, func(), error) {
 	if value := os.Getenv("replace with firestore emulator host"); value != "" {
 		fmt.Println("using firestore emulator: ", value)
 	}
-	//setup any firebase config
-	//database connection will be made on app start
-	return &FirestoreUrlShortenerService{firebaseConfig: &firebase.Config{ProjectID: projectId}, database: nil}
+
+	conf := &firebase.Config{ProjectID: projectId}
+	app, err := firebase.NewApp(ctx, conf)
+	if err != nil {
+		fmt.Println("error making new firebase app: ", err)
+		return nil, nil, err
+	}
+
+	database, err := app.Firestore(ctx)
+	if err != nil {
+		fmt.Println("error making firestore connection: ", err)
+		return nil, nil, err
+	}
+
+	closeFunc := func() {
+		database.Close()
+	}
+
+	return &FirestoreUrlShortenerService{database: database}, closeFunc, nil
 }
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

@@ -1,17 +1,23 @@
 package handler
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 	"go_url_shortener/services"
 	"go_url_shortener/utils"
-	"io"
+	"html/template"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type Url struct {
-	service services.UrlShortenerService
+	Service services.UrlShortenerService
+}
+
+func (u *Url) GetURLForm(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("../templates/home.html"))
+	tmpl.Execute(w, nil)
+	return
 }
 
 func (u *Url) CreateShortUrl(w http.ResponseWriter, r *http.Request) {
@@ -20,24 +26,15 @@ func (u *Url) CreateShortUrl(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var longUrl string
 
-	//body of request only needs to be the longurl
-	reqBody, err := io.ReadAll(r.Body)
-	if err != nil {
+	longUrl = r.FormValue("url")
+
+	if longUrl == "" {
 		code = 400
-		fmt.Println(err)
-		utils.RespondWithError(w, code, err.Error())
+		utils.RespondWithError(w, code, errors.New("no longUrl passed to request").Error())
 		return
 	}
 
-	err = json.Unmarshal(reqBody, &longUrl)
-	if err != nil {
-		code = 400
-		fmt.Println(err)
-		utils.RespondWithError(w, code, err.Error())
-		return
-	}
-
-	shortUrl, err := u.service.CreateShortUrl(r.Context(), longUrl)
+	shortUrl, err := u.Service.CreateShortUrl(r.Context(), longUrl)
 	//determine what type of error and change code and return according error message
 	if err != nil {
 		code = 500
@@ -52,7 +49,7 @@ func (u *Url) GetLongUrl(w http.ResponseWriter, r *http.Request) {
 	var code = 200
 	var err error
 
-	shortUrl := chi.UrlParam(r, "id")
+	shortUrl := chi.URLParam(r, "id")
 	if shortUrl == "" {
 		code = 400
 		utils.RespondWithError(w, code, errors.New("no shortUrl passed to request").Error())
@@ -61,14 +58,14 @@ func (u *Url) GetLongUrl(w http.ResponseWriter, r *http.Request) {
 
 	//TODO get a check somewhere in here eventually to see if the url is in the cache
 
-	longUrl, err := u.service.GetLongUrl(r.Context(), shortUrl)
+	longUrl, err := u.Service.GetLongUrl(r.Context(), shortUrl)
 	//determine what type of error and change code and return according error message
 	if err != nil {
 		code = 500
 		utils.RespondWithError(w, code, err.Error())
 		return
 	}
-	if longUrl == nil {
+	if longUrl == "" {
 		code = 404
 		utils.RespondWithError(w, code, errors.New("cannot find long url").Error())
 		return
